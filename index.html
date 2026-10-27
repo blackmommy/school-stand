@@ -1,0 +1,514 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Исторический стенд • Аудиогид</title>
+  <style>
+    :root {
+      --primary: #8b0000;
+      --gold: #d4af37;
+      --dark: #1f2421;
+      --bg: #f8f6f0;
+      --card-bg: #ffffff;
+      --text: #2c3e50;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+    }
+
+    .container {
+      max-width: 580px;
+      width: 100%;
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #700000, #9b111e);
+      color: #fff;
+      padding: 20px 16px;
+      text-align: center;
+      border-bottom: 4px solid var(--gold);
+    }
+
+    header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .badge-dynasty {
+      display: inline-block;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.4);
+      color: #fff;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      margin-right: 6px;
+    }
+
+    .badge-author {
+      display: inline-block;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid var(--gold);
+      color: #fff;
+      padding: 3px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .content-area {
+      padding: 22px 18px;
+      text-align: center;
+    }
+
+    .leader-years {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .leader-name {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 16px;
+      line-height: 1.25;
+    }
+
+    .audio-box {
+      background: #fdfaf2;
+      border: 1px solid var(--gold);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-size: 14px;
+      color: #5c4300;
+    }
+
+    .wave {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 18px;
+    }
+    .wave span {
+      width: 4px;
+      background: var(--primary);
+      border-radius: 2px;
+      animation: sound-wave 0.8s infinite alternate ease-in-out;
+    }
+    .wave span:nth-child(2) { animation-delay: 0.2s; height: 100%; }
+    .wave span:nth-child(1), .wave span:nth-child(3) { height: 60%; }
+    .wave.paused span { animation: none; height: 4px; }
+
+    @keyframes sound-wave {
+      0% { height: 4px; }
+      100% { height: 18px; }
+    }
+
+    .bio-box {
+      text-align: left;
+      line-height: 1.6;
+      font-size: 15px;
+      background: #fbfbfb;
+      padding: 16px;
+      border-radius: 10px;
+      border-left: 4px solid var(--primary);
+      margin-bottom: 20px;
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 13px 18px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-voice { background: var(--primary); color: #fff; }
+    .btn-wiki { background: #fff; color: var(--dark); border: 1px solid #ccc; }
+
+    /* Оверлей первого клика для обхода блокировки звука мобильными браузерами */
+    .autoplay-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      z-index: 9999;
+      cursor: pointer;
+    }
+    .autoplay-overlay.hidden { display: none; }
+    .autoplay-icon {
+      font-size: 52px;
+      margin-bottom: 14px;
+      animation: bounce 1.5s infinite;
+    }
+    .autoplay-btn {
+      margin-top: 18px;
+      background: var(--gold);
+      color: #000;
+      font-weight: 700;
+      padding: 14px 28px;
+      border-radius: 30px;
+      font-size: 16px;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* Навигация по правителям */
+    .catalog-section {
+      margin-top: 24px;
+      border-top: 1px solid #eee;
+      padding-top: 16px;
+      text-align: left;
+    }
+    .catalog-title {
+      font-size: 14px;
+      color: #777;
+      margin-bottom: 10px;
+      text-align: center;
+      font-weight: 600;
+    }
+    .catalog-group-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 10px 0 6px;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .chip {
+      background: #f1f3f5;
+      color: #333;
+      text-decoration: none;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+    .chip.active {
+      background: var(--primary);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Экран автозапуска звука при переходе -->
+  <div class="autoplay-overlay" id="autoplayOverlay">
+    <div class="autoplay-icon">🔊</div>
+    <h2 id="overlayName">Исторический стенд</h2>
+    <p style="margin-top: 8px; color: #ddd;">Нажмите в любое место, чтобы прослушать аудиогид</p>
+    <div class="autoplay-btn">Включить звук</div>
+  </div>
+
+  <div class="container">
+    <header>
+      <h1>Школьный исторический стенд</h1>
+      <div style="margin-top: 6px;">
+        <span class="badge-dynasty" id="dynastyBadge">Династия</span>
+        <span class="badge-author">Автор стенда: Лариса Николаевна</span>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div class="leader-years" id="leaderYears">...</div>
+      <h2 class="leader-name" id="leaderName">Загрузка...</h2>
+
+      <div class="audio-box">
+        <div class="wave paused" id="audioWave"><span></span><span></span><span></span></div>
+        <span id="audioStatusText">Подготовка аудио...</span>
+      </div>
+
+      <div class="bio-box" id="leaderBio"></div>
+
+      <div class="actions">
+        <button class="btn btn-voice" id="playAudioBtn">🔊 Повторить озвучку</button>
+        <a href="#" target="_blank" class="btn btn-wiki" id="wikiBtn">📖 Читать статью в Википедии</a>
+      </div>
+
+      <div class="catalog-section">
+        <div class="catalog-title">Все правители стендов:</div>
+        
+        <div class="catalog-group-name">Рюриковичи</div>
+        <div class="chips" id="chipsRurik"></div>
+
+        <div class="catalog-group-name">Романовы</div>
+        <div class="chips" id="chipsRomanov"></div>
+
+        <div class="catalog-group-name">Советские и российские лидеры</div>
+        <div class="chips" id="chipsSoviet"></div>
+      </div>
+    </div>
+  </div>
+
+  <audio id="fallbackAudio" preload="auto"></audio>
+
+  <script>
+    const leaders = {
+      // 1. РЮРИКОВИЧИ
+      rurik: {
+        dynasty: "Рюриковичи",
+        name: "Рюрик",
+        years: "862 — 879",
+        shortBio: "Летописный основатель Древнерусского государства, первый новгородский князь и родоначальник княжеской династии Рюриковичей.",
+        voiceText: "Перед вами представлен Рюрик. Летописный основатель Древнерусского государства, первый новгородский князь и родоначальник династии Рюриковичей.",
+        wiki: "https://ru.wikipedia.org/wiki/Рюрик"
+      },
+      oleg: {
+        dynasty: "Рюриковичи",
+        name: "Олег Вещий",
+        years: "879 — 912",
+        shortBio: "Князь новгородский и киевский, объединил Киев и Новгород под единой властью в 882 году, совершил победоносный поход на Константинополь.",
+        voiceText: "Перед вами представлен князь Олег Вещий. Объединитель Новгорода и Киева, создатель единого Древнерусского государства.",
+        wiki: "https://ru.wikipedia.org/wiki/Олег_Вещий"
+      },
+      olga: {
+        dynasty: "Рюриковичи",
+        name: "Княгиня Ольга",
+        years: "945 — 960",
+        shortBio: "Правительница Киевской Руси в период малолетства сына Святослава. Первая из русских правителей приняла христианство.",
+        voiceText: "Перед вами представлена святая княгиня Ольга. Правительница Киевской Руси, упорядочившая сбор дани и первой принявшая христианство.",
+        wiki: "https://ru.wikipedia.org/wiki/Ольга_(княгиня_киевская)"
+      },
+      vladimir_1: {
+        dynasty: "Рюриковичи",
+        name: "Владимир Святославич",
+        years: "978 — 1015",
+        shortBio: "Князь киевский, креститель Руси в 988 году, существенно укрепивший оборону границ и международный авторитет государства.",
+        voiceText: "Перед вами представлен князь Владимир Святославич, Креститель Руси, определивший духовный и культурный путь развития страны.",
+        wiki: "https://ru.wikipedia.org/wiki/Владимир_Святославич"
+      },
+      yaroslav: {
+        dynasty: "Рюриковичи",
+        name: "Ярослав Мудрый",
+        years: "1019 — 1054",
+        shortBio: "Великий князь киевский. Автор первого на Руси письменного свода законов «Русская Правда», создатель Софийского собора в Киеве.",
+        voiceText: "Перед вами представлен Ярослав Мудрый. Создатель первого письменного свода законов Русская Правда и покровитель просвещения.",
+        wiki: "https://ru.wikipedia.org/wiki/Ярослав_Мудрый"
+      },
+      monomakh: {
+        dynasty: "Рюриковичи",
+        name: "Владимир Мономах",
+        years: "1113 — 1125",
+        shortBio: "Великий князь киевский, выдающийся полководец и мыслитель, автор «Поучения», сумевший временно прекратить княжеские усобицы.",
+        voiceText: "Перед вами представлен Владимир Мономах. Выдающийся государственный деятель, объединитель русских земель и автор знаменитого Поучения.",
+        wiki: "https://ru.wikipedia.org/wiki/Владимир_Мономах"
+      },
+      dolgorukiy: {
+        dynasty: "Рюриковичи",
+        name: "Юрий Долгорукий",
+        years: "1149 — 1157",
+        shortBio: "Князь ростово-суздальский и великий князь киевский, основатель многих городов Северо-Восточной Руси, включая Москву (1147 г.).",
+        voiceText: "Перед вами представлен Юрий Долгорукий. Князь ростово-суздальский, традиционно считающийся основателем Москвы.",
+        wiki: "https://ru.wikipedia.org/wiki/Юрий_Долгорукий"
+      },
+      bogolyubskiy: {
+        dynasty: "Рюриковичи",
+        name: "Андрей Боголюбский",
+        years: "1157 — 1174",
+        shortBio: "Великий князь владимирский, перенёс столицу во Владимир, сделал Владимиро-Суздальское княжество сильнейшим на Руси.",
+        voiceText: "Перед вами представлен князь Андрей Боголюбский. Государь, возвысивший город Владимир и укрепивший княжескую власть.",
+        wiki: "https://ru.wikipedia.org/wiki/Андрей_Боголюбский"
+      },
+      vsevolod: {
+        dynasty: "Рюриковичи",
+        name: "Всеволод Большое Гнездо",
+        years: "1176 — 1212",
+        shortBio: "Великий князь владимирский, при котором Владимиро-Суздальская земля достигла наивысшего могущества и расцвета зодчества.",
+        voiceText: "Перед вами представлен Всеволод Большое Гнездо. Великий князь владимирский, при котором княжество достигло наивысшего могущества.",
+        wiki: "https://ru.wikipedia.org/wiki/Всеволод_Большое_Гнездо"
+      },
+      nevsky: {
+        dynasty: "Рюриковичи",
+        name: "Александр Невский",
+        years: "1252 — 1263",
+        shortBio: "Великий князь владимирский и полководец, одержавший исторические победы в Невской битве (1240) и Ледовом побоище (1242).",
+        voiceText: "Перед вами представлен святой князь Александр Невский. Выдающийся полководец и дипломат, защитник рубежей Руси.",
+        wiki: "https://ru.wikipedia.org/wiki/Александр_Невский"
+      },
+      kalita: {
+        dynasty: "Рюриковичи",
+        name: "Иван I Калита",
+        years: "1325 — 1340",
+        shortBio: "Князь московский и великий князь владимирский, заложивший основы экономического лидерства Москвы и объединения русских земель.",
+        voiceText: "Перед вами представлен Иван Первый Калита. Мудрый правитель, заложивший основы возвышения и могущества Москвы.",
+        wiki: "https://ru.wikipedia.org/wiki/Иван_I_Калита"
+      },
+      donskoy: {
+        dynasty: "Рюриковичи",
+        name: "Дмитрий Донской",
+        years: "1359 — 1389",
+        shortBio: "Великий князь московский и владимирский, возглавил победу русских полков над ордынским войском в Куликовской битве 1380 года.",
+        voiceText: "Перед вами представлен Дмитрий Донской. Великий князь московский, герой легендарной Куликовской битвы 1380 года.",
+        wiki: "https://ru.wikipedia.org/wiki/Дмитрий_Донской"
+      },
+      ivan_3: {
+        dynasty: "Рюриковичи",
+        name: "Иван III Васильевич",
+        years: "1462 — 1505",
+        shortBio: "Государь всея Руси, создатель единого Русского государства, окончательно свергнувший ордынское иго после Стояния на реке Угре (1480).",
+        voiceText: "Перед вами представлен Иван Третий Великий. Создатель единого Российского государства, окончательно свергнувший ордынское иго.",
+        wiki: "https://ru.wikipedia.org/wiki/Иван_III_Васильевич"
+      },
+      grozny: {
+        dynasty: "Рюриковичи",
+        name: "Иван IV Грозный",
+        years: "1533 — 1584",
+        shortBio: "Первый венчанный царь всея Руси. Присоединил Казанское и Астраханское ханства, Сибирь, провёл масштабные судебные и военные реформы.",
+        voiceText: "Перед вами представлен царь Иван Четвертый Грозный. Первый венчанный русский царь, значительно расширивший границы державы.",
+        wiki: "https://ru.wikipedia.org/wiki/Иван_Грозный"
+      },
+      godunov: {
+        dynasty: "Рюриковичи (Переходный)",
+        name: "Борис Годунов",
+        years: "1598 — 1605",
+        shortBio: "Первый русский царь из некоронованной знати, избранный Земским собором после пресечения династии московских Рюриковичей.",
+        voiceText: "Перед вами представлен царь Борис Годунов. Первый государь, избранный Земским собором после пресечения династии Рюриковичей.",
+        wiki: "https://ru.wikipedia.org/wiki/Борис_Годунов"
+      },
+
+      // 2. РОМАНОВЫ
+      mikhail: {
+        dynasty: "Романовы",
+        name: "Михаил Фёдорович",
+        years: "1613 — 1645",
+        shortBio: "Первый русский царь из династии Романовых, избранный Земским собором в 1613 году, что положило конец Смутному времени.",
+        voiceText: "Перед вами представлен Михаил Федорович Романов. Первый царь династии Романовых, положивший конец Смутному времени.",
+        wiki: "https://ru.wikipedia.org/wiki/Михаил_Фёдорович"
+      },
+      aleksey: {
+        dynasty: "Романовы",
+        name: "Алексей Михайлович",
+        years: "1645 — 1676",
+        shortBio: "Второй царь из династии Романовых, по прозвищу «Тишайший». При нём принято Соборное уложение 1649 г. и произошло воссоединение с Левобережной Украиной.",
+        voiceText: "Перед вами представлен царь Алексей Михайлович Тишайший. Правитель, принявший Соборное уложение и укрепивший государственность.",
+        wiki: "https://ru.wikipedia.org/wiki/Алексей_Михайлович"
+      },
+      peter_1: {
+        dynasty: "Романовы",
+        name: "Пётр I Великий",
+        years: "1682 — 1725",
+        shortBio: "Первый Император Всероссийский, великий реформатор, создатель русского флота, регулярной армии и основатель Санкт-Петербурга.",
+        voiceText: "Перед вами представлен император Петр Первый Великий. Реформатор, основатель Санкт-Петербурга и создатель Российской империи.",
+        wiki: "https://ru.wikipedia.org/wiki/Пётр_I"
+      },
+      elizaveta: {
+        dynasty: "Романовы",
+        name: "Елизавета Петровна",
+        years: "1741 — 1761",
+        shortBio: "Императрица Всероссийская, дочь Петра I. Эпоха расцвета культуры, основания Московского университета и Академии художеств.",
+        voiceText: "Перед вами представлена императрица Елизавета Петровна. Дочь Петра Великого, основательница Московского университета.",
+        wiki: "https://ru.wikipedia.org/wiki/Елизавета_Петровна"
+      },
+      ekaterina_2: {
+        dynasty: "Романовы",
+        name: "Екатерина II Великая",
+        years: "1762 — 1796",
+        shortBio: "Императрица Всероссийская, эпоха «просвещённого абсолютизма», присоединение Крыма, Новороссии и значительное укрепление могущества державы.",
+        voiceText: "Перед вами представлена Екатерина Вторая Великая. Эпоха просвещенного абсолютизма, присоединения Крыма и славных побед.",
+        wiki: "https://ru.wikipedia.org/wiki/Екатерина_II"
+      },
+      alexander_1: {
+        dynasty: "Романовы",
+        name: "Александр I",
+        years: "1801 — 1825",
+        shortBio: "Император Всероссийский, руководил страной в период Отечественной войны 1812 года и заграничных походов русской армии против Наполеона.",
+        voiceText: "Перед вами представлен Александр Первый Благословенный. Император-победитель в Отечественной войне 1812 года.",
+        wiki: "https://ru.wikipedia.org/wiki/Александр_I"
+      },
+      nikolay_1: {
+        dynasty: "Романовы",
+        name: "Николай I",
+        years: "1825 — 1855",
+        shortBio: "Император Всероссийский, провёл кодификацию законов Российской империи, построил первую железную дорогу, укрепил государственное управление.",
+        voiceText: "Перед вами представлен император Николай Первый. Правитель, упорядочивший законы империи и построивший первые железные дороги.",
+        wiki: "https://ru.wikipedia.org/wiki/Николай_I"
+      },
+      alexander_2: {
+        dynasty: "Романовы",
+        name: "Александр II Освободитель",
+        years: "1855 — 1881",
+        shortBio: "Император Всероссийский, отменивший крепостное право в 1861 году и проведший масштабные либеральные «Великие реформы».",
+        voiceText: "Перед вами представлен Александр Второй Освободитель. Император, отменивший крепостное право и проведший Великие реформы.",
+        wiki: "https://ru.wikipedia.org/wiki/Александр_II"
+      },
+      alexander_3: {
+        dynasty: "Романовы",
+        name: "Александр III Миротворец",
+        years: "1881 — 1894",
+        shortBio: "Император Всероссийский. При его правлении Россия не вела ни одной войны, началось бурное развитие тяжелой промышленности и Транссиба.",
+        voiceText: "Перед вами представлен император Александр Третий Миротворец. Период мира, экономической стабильности и строительства Транссиба.",
+        wiki: "https://ru.wikipedia.org/wiki/Александр_III"
+      },
+      nikolay_2: {
+        dynasty: "Романовы",
+        name: "Николай II",
+        years: "1894 — 1917",
+        shortBio: "Последний Император Всероссийский. Период экономического роста, Первой мировой войны и революционных событий 1917 года.",
+        voiceText: "Перед вами представлен Николай Второй. Последний император Российской империи.",
+        wiki: "https://ru.wikipedia.org/wiki/Николай_II"
+      },
+
+      // 3. СОВЕТСКИЕ И РОССИЙСКИЕ ЛИДЕРЫ
+      lenin: {
+        dynasty: "СССР и РФ",
+        name: "Владимир Ильич Ленин",
+        years: "1917 — 1924",
+        shortBio: "Основатель Советского государства, руководитель Октябрьской революции 1917 года, первый председатель Совета Народных Комиссаров СССР.",
+        voiceText: "Перед вами представлен Владимир Ильич Ленин. Основатель Советского государства, руководитель Октябрьской революции 1917 года и первый председатель Совета Народных Комиссаров СССР.",
+        wiki: "https://ru.wikipedia.org/wiki/Ленин,_Владимир_Ильич"
+      },
+      stalin: {
+        dynasty: "СССР и РФ",
+        name: "Иосиф Виссарионович Сталин",
+        years: "1924 — 1953",
+ 
