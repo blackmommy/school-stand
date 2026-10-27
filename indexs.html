@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Исторический стенд • Создано Ларисой Николаевной</title>
+  <style>
+    :root {
+      --primary: #8b0000;
+      --gold: #d4af37;
+      --dark: #1f2421;
+      --bg: #f8f6f0;
+      --card-bg: #ffffff;
+      --text: #2c3e50;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 15px;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #700000, #9b111e);
+      color: #fff;
+      padding: 24px 20px;
+      text-align: center;
+      border-bottom: 4px solid var(--gold);
+    }
+
+    header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .badge-author {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid var(--gold);
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+
+    .content-area {
+      padding: 24px 20px;
+      text-align: center;
+    }
+
+    .leader-years {
+      font-size: 14px;
+      font-weight: 600;
+      color: #8b0000;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .leader-name {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 16px;
+    }
+
+    .audio-status {
+      background: #fbf6ea;
+      border: 1px dashed var(--gold);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 14px;
+      color: #634a00;
+    }
+
+    .wave {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 16px;
+    }
+    .wave span {
+      width: 3px;
+      background: #8b0000;
+      border-radius: 2px;
+      animation: sound-wave 1s infinite alternate ease-in-out;
+    }
+    .wave span:nth-child(2) { animation-delay: 0.2s; height: 100%; }
+    .wave span:nth-child(1), .wave span:nth-child(3) { height: 60%; }
+    .wave.paused span { animation: none; height: 4px; }
+
+    @keyframes sound-wave {
+      0% { height: 4px; }
+      100% { height: 16px; }
+    }
+
+    .bio-box {
+      text-align: left;
+      line-height: 1.6;
+      font-size: 15px;
+      background: #fafafa;
+      padding: 16px;
+      border-radius: 10px;
+      border-left: 4px solid var(--primary);
+      margin-bottom: 24px;
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-voice {
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-voice:hover { background: #6b0000; }
+
+    .btn-wiki {
+      background: #fff;
+      color: var(--dark);
+      border: 1px solid #ccc;
+    }
+    .btn-wiki:hover { background: #f0f0f0; }
+
+    /* Список выбора правителя, если зашли без параметра */
+    .leaders-nav {
+      margin-top: 24px;
+      text-align: left;
+      border-top: 1px solid #eee;
+      padding-top: 20px;
+    }
+    .leaders-nav h3 {
+      font-size: 15px;
+      color: #666;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 8px;
+    }
+    .nav-item {
+      padding: 8px;
+      font-size: 13px;
+      text-align: center;
+      background: #f1f3f5;
+      border-radius: 6px;
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+    }
+    .nav-item.active {
+      background: var(--primary);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Школьный исторический стенд</h1>
+      <span class="badge-author">Автор стенда: Лариса Николаевна</span>
+    </header>
+
+    <div class="content-area">
+      <div class="leader-years" id="leaderYears">1917 — 1924</div>
+      <h2 class="leader-name" id="leaderName">Владимир Ильич Ленин</h2>
+
+      <div class="audio-status" id="audioStatus">
+        <div class="wave" id="audioWave"><span></span><span></span><span></span></div>
+        <span id="audioStatusText">Нажмите кнопку ниже, чтобы включить звук</span>
+      </div>
+
+      <div class="bio-box" id="leaderBio">
+        Загрузка информации...
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-voice" id="playAudioBtn">
+          🔊 Прослушать аудиосообщение
+        </button>
+        <a href="#" target="_blank" class="btn btn-wiki" id="wikiBtn">
+          📖 Читать статью в Википедии
+        </a>
+      </div>
+
+      <div class="leaders-nav">
+        <h3>Все руководители стенда:</h3>
+        <div class="nav-grid" id="navGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const leaders = {
+      lenin: {
+        name: "Владимир Ильич Ленин",
+        years: "1917 — 1924",
+        shortBio: "Основатель Советского государства, лидер Октябрьской революции 1917 года, первый председатель Совета Народных Комиссаров СССР.",
+        voiceText: "Перед вами представлен Владимир Ильич Ленин, созданный Ларисой Николаевной. Основатель Советского государства и лидер Октябрьской революции.",
+        wiki: "https://ru.wikipedia.org/wiki/Ленин,_Владимир_Ильич"
+      },
+      stalin: {
+        name: "Иосиф Виссарионович Сталин",
+        years: "1924 — 1953",
+        shortBio: "Генеральный секретарь ЦК ВКП(б)/КПСС, руководитель Советского Союза в период индустриализации, Великой Отечественной войны и послевоенного восстановления.",
+        voiceText: "Перед вами представлен Иосиф Виссарионович Сталин, созданный Ларисой Николаевной. Руководитель Советского государства в годы Великой Отечественной войны и индустриализации.",
+        wiki: "https://ru.wikipedia.org/wiki/Сталин,_Иосиф_Виссарионович"
+      },
+      khrushchev: {
+        name: "Никита Сергеевич Хрущёв",
+        years: "1953 — 1964",
+        shortBio: "Первый секретарь ЦК КПСС. Период его руководства известен как «оттепель», началом освоения целины и эпохой первых полетов человека в космос.",
+        voiceText: "Перед вами представлен Никита Сергеевич Хрущёв, созданный Ларисой Николаевной. Период его руководства вошел в историю как эпоха оттепели и покорения космоса.",
+        wiki: "https://ru.wikipedia.org/wiki/Хрущёв,_Никита_Сергеевич"
+      },
+      brezhnev: {
+        name: "Леонид Ильич Брежнев",
+        years: "1964 — 1982",
+        shortBio: "Генеральный секретарь ЦК КПСС. Период масштабного промышленного строительства, стабильности и космических триумфов СССР.",
+        voiceText: "Перед вами представлен Леонид Ильич Брежнев, созданный Ларисой Николаевной. Руководитель СССР на протяжении восемнадцати лет стабильности и масштабного строительства.",
+        wiki: "https://ru.wikipedia.org/wiki/Брежнев,_Леонид_Ильич"
+      },
+      andropov: {
+        name: "Юрий Владимирович Андропов",
+        years: "1982 — 1984",
+        shortBio: "Генеральный секретарь ЦК КПСС, инициировал кампанию по укреплению производственной дисциплины и реформированию экономики.",
+        voiceText: "Перед вами представлен Юрий Владимирович Андропов, созданный Ларисой Николаевной. Руководитель Советского Союза, выступавший за строгую дисциплину и реформы.",
+        wiki: "https://ru.wikipedia.org/wiki/Андропов,_Юрий_Владимирович"
+      },
+      gorbachev: {
+        name: "Михаил Сергеевич Горбачёв",
+        years: "1985 — 1991",
+        shortBio: "Последний генеральный секретарь ЦК КПСС и единственный Президент СССР, начавший политику гласности и перестройки.",
+        voiceText: "Перед вами представлен Михаил Сергеевич Горбачёв, созданный Ларисой Николаевной. Первый и единственный Президент СССР, провозгласивший политику гласности и перестройки.",
+        wiki: "https://ru.wikipedia.org/wiki/Горбачёв,_Михаил_Сергеевич"
+      },
+      yeltsin: {
+        name: "Борис Николаевич Ельцин",
+        years: "1991 — 1999",
+        shortBio: "Первый Президент Российской Федерации, руководивший страной на начальном этапе формирования современного демократического государства.",
+        voiceText: "Перед вами представлен Борис Николаевич Ельцин, созданный Ларисой Николаевной. Первый Президент Российской Федерации.",
+        wiki: "https://ru.wikipedia.org/wiki/Ельцин,_Борис_Николаевич"
+      }
+    };
+
+    // Определение правителя по параметру URL ?id=...
+    const urlParams = new URLSearchParams(window.location.search);
+    let currentId = urlParams.get('id') || 'lenin';
+    if (!leaders[currentId]) currentId = 'lenin';
+
+    const currentData = leaders[currentId];
+
+    // Рендер страницы
+    document.getElementById('leaderName').textContent = currentData.name;
+    document.getElementById('leaderYears').textContent = currentData.years;
+    document.getElementById('leaderBio').textContent = currentData.shortBio;
+    document.getElementById('wikiBtn').href = currentData.wiki;
+
+    // Отрисовка списка для переключения
+    const navGrid = document.getElementById('navGrid');
+    Object.keys(leaders).forEach(key => {
+      const a = document.createElement('a');
+      a.className = 'nav-item' + (key === currentId ? ' active' : '');
+      a.textContent = leaders[key].name.split(' ')[0] + ' ' + leaders[key].name.split(' ')[2];
+      a.href = '?id=' + key;
+      navGrid.appendChild(a);
+    });
+
+    // Функция синтеза речи
+    function speakText() {
+      if (!('speechSynthesis' in window)) {
+        alert("Ваш браузер не поддерживает встроенный синтез речи.");
+        return;
+      }
+      window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(currentData.voiceText);
+      utterance.lang = 'ru-RU';
+      utterance.rate = 0.95;
+
+      const wave = document.getElementById('audioWave');
+      const statusText = document.getElementById('audioStatusText');
+
+      utterance.onstart = () => {
+        wave.classList.remove('paused');
+        statusText.textContent = "Воспроизведение аудиосообщения...";
+      };
+
+      utterance.onend = () => {
+        wave.classList.add('paused');
+        statusText.textContent = "Аудио прослушано. Нажмите кнопку, чтобы повторить.";
+      };
+
+      utterance.onerror = () => {
+        wave.classList.add('paused');
+        statusText.textContent = "Нажмите кнопку ниже для воспроизведения.";
+      };
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Слушатели событий
+    document.getElementById('playAudioBtn').addEventListener('click', speakText);
+
+    // Попытка автовоспроизведения при клике в любой точке экрана (требование мобильных браузеров iOS/Android)
+    document.body.addEventListener('click', function autoFirstPlay() {
+      if (!window.speechSynthesis.speaking) {
+        speakText();
+      }
+      document.body.removeEventListener('click', autoFirstPlay);
+    }, { once: true });
+  </script>
+</body>
+</html>
